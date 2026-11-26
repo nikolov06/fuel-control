@@ -27,7 +27,8 @@ interface RefuelLite {
   source: string | null;
 }
 
-const FIELDS: (keyof DayRow)[] = ["driver", "km", "norm"];
+// Шофьорът се пази в базата, но не се показва (колите са мениджърски)
+const FIELDS: (keyof DayRow)[] = ["km", "norm"];
 const WD = ["нд", "пн", "вт", "ср", "чт", "пт", "сб"];
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -63,7 +64,6 @@ export default function TripLog() {
   const [opening, setOpening] = useState("");
   const [openingHint, setOpeningHint] = useState("");
   const [refuels, setRefuels] = useState<RefuelLite[]>([]);
-  const [defDriver, setDefDriver] = useState("");
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ kind: "ok" | "err" | "warn"; text: string } | null>(null);
@@ -135,7 +135,7 @@ export default function TripLog() {
     let outside = 0;
     const dateMode = lines.some((c) => parseDay(c[0] ?? "") !== null);
     if (dateMode) {
-      // Редове: Дата | Шофьор | Км | ... (както е в справката)
+      // Редове: Дата | Шофьор | Км | ... -> взимаме датата и първото число като км, шофьора игнорираме
       for (const c of lines) {
         const day = parseDay(c[0] ?? "");
         if (!day) continue;
@@ -144,11 +144,9 @@ export default function TripLog() {
           continue;
         }
         const rest = c.slice(1).map((x) => x.trim());
-        const driver = rest.find((x) => x && !isNumText(x)) ?? "";
-        const kmIdx = rest.findIndex((x) => isNumText(x));
-        const km = kmIdx >= 0 ? rest[kmIdx] : "";
+        const km = rest.find((x) => isNumText(x)) ?? "";
         const cur = next[day] ?? { driver: "", km: "", norm: "" };
-        next[day] = { ...cur, driver: driver || cur.driver, km: km || "" };
+        next[day] = { ...cur, km };
         filled++;
       }
     } else {
@@ -172,17 +170,6 @@ export default function TripLog() {
       kind: outside ? "warn" : "ok",
       text: `Поставени ${filled} реда.${outside ? ` ${outside} реда са от друг месец и са пропуснати.` : ""} Не забравяй „Запиши“.`,
     });
-  }
-
-  function fillDriver() {
-    if (!defDriver.trim()) return;
-    const next = { ...rows };
-    for (const d of days) {
-      const r = next[d];
-      if (r && toNum(r.km) && !r.driver.trim()) next[d] = { ...r, driver: defDriver.trim() };
-    }
-    setRows(next);
-    setDirty(true);
   }
 
   async function onImportFile(f: File | undefined) {
@@ -266,7 +253,7 @@ export default function TripLog() {
   function exportXlsx() {
     downloadXlsx(
       calc.out.map((x) => ({
-        Дата: x.d.split("-").reverse().join("."), Шофьор: x.r.driver, "Изминати км": x.k || "",
+        Дата: x.d.split("-").reverse().join("."), "Изминати км": x.k || "",
         "Норма л/100": x.k ? x.n : "", "Заредено л": x.f || "", "Изразходено л": x.k ? Math.round(x.c * 1000) / 1000 : "",
         "Остатък л": Math.round(x.rest * 1000) / 1000,
       })),
@@ -283,8 +270,8 @@ export default function TripLog() {
         <h2>Пътни листове (без GPS)</h2>
       </div>
       <p className="muted">
-        За колите без GPS: дневни км и шофьор. Зарежданията идват автоматично от Лукойл и ръчните. Можеш да поставиш от Excel колоните
-        <b> Дата | Шофьор | Км</b> (Cmd/Ctrl+V в която и да е клетка).
+        За колите без GPS: дневни км. Зарежданията идват автоматично от Лукойл и ръчните. Можеш да поставиш от Excel колоните
+        <b> Дата | Км</b> (Cmd/Ctrl+V в която и да е клетка; колона с шофьор се игнорира).
       </p>
 
       <div className="toolbar">
@@ -296,7 +283,7 @@ export default function TripLog() {
         <div className="card">
           <h3>Импорт от файла „справка за изразходено гориво“</h3>
           <p className="muted small">
-            Един лист на месец (01.2026, 02.2026…). Взимат се км, шофьор, нормата за всеки ден (от формулата), остатъците и
+            Един лист на месец (01.2026, 02.2026…). Взимат се км, нормата за всеки ден (от формулата), остатъците и
             километража. Зарежданията от файла се записват само за месеци без данни от Лукойл. Повторен импорт презаписва.
           </p>
           <input type="file" accept=".xlsx,.xls" onChange={(e) => onImportFile(e.target.files?.[0])} />
@@ -362,13 +349,6 @@ export default function TripLog() {
           Остатък гориво в началото (л)
           <input className="num" value={opening} onChange={(e) => { setOpening(e.target.value); setDirty(true); }} style={{ width: 110 }} title={openingHint} />
         </label>
-        <label>
-          Шофьор по подразбиране
-          <span style={{ display: "flex", gap: 6 }}>
-            <input value={defDriver} onChange={(e) => setDefDriver(e.target.value)} style={{ width: 160 }} />
-            <button className="btn small" onClick={fillDriver} title="Попълва празните шофьори в дните с км">Попълни</button>
-          </span>
-        </label>
         <span className="spacer" />
         <button className="btn" onClick={exportXlsx}>Excel</button>
         <button className="btn primary" onClick={save} disabled={busy || !plate}>
@@ -393,7 +373,7 @@ export default function TripLog() {
         <table className="grid compact editable">
           <thead>
             <tr>
-              <th>Дата</th><th>Шофьор</th><th className="num">Км</th><th className="num">Норма</th>
+              <th>Дата</th><th className="num">Км</th><th className="num">Норма</th>
               <th className="num">Заредено л</th><th className="num">Изразходено л</th><th className="num">Остатък л</th><th>Зареждания</th>
             </tr>
           </thead>
@@ -404,7 +384,6 @@ export default function TripLog() {
               return (
                 <tr key={x.d} className={wd === 0 || wd === 6 ? "weekend" : ""}>
                   <td className="nowrap">{x.d.slice(8)}.{x.d.slice(5, 7)} <span className="muted small">{WD[wd]}</span></td>
-                  <td><input value={r.driver} onChange={(e) => setCell(x.d, "driver", e.target.value)} onPaste={(e) => onPaste(e, i, "driver")} style={{ width: 180 }} /></td>
                   <td><input className="num" value={r.km} onChange={(e) => setCell(x.d, "km", e.target.value)} onPaste={(e) => onPaste(e, i, "km")} style={{ width: 70 }} /></td>
                   <td>
                     <input className="num" value={r.norm} placeholder={veh?.norm_l_100km != null ? String(veh.norm_l_100km) : ""}
@@ -424,7 +403,7 @@ export default function TripLog() {
           </tbody>
           <tfoot>
             <tr>
-              <td className="strong">ОБЩО</td><td></td>
+              <td className="strong">ОБЩО</td>
               <td className="num strong">{fmt(calc.km, 0)}</td><td></td>
               <td className="num strong">{fmt(calc.ref)}</td>
               <td className="num strong">{fmt(calc.cons, 3)}</td>

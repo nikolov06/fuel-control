@@ -135,3 +135,9 @@ td.cell-err { background: #fde2df !important; color: var(--err); font-weight: 60
 .card .page-head .btn:first-of-type { margin-left: auto; }
 tr.weekend td { background: #f7f8fa; }
 table.grid tfoot td { position: sticky; bottom: 0; background: #f0f2f5; border-top: 1px solid var(--line); padding: 7px 8px; }
+
+/* Филтри по колони (втори ред на заглавието) */
+table.grid thead tr.filter-row th { top: 31px; padding: 3px 4px; }
+table.grid input.col-filter { width: 100%; min-width: 50px; box-sizing: border-box; padding: 2px 5px; font-size: 12px; font-weight: 400; }
+table.grid th.num input.col-filter { text-align: right; }
+table.grid input.col-filter.active { background: #fff6bf; border-color: #e0c400; }
