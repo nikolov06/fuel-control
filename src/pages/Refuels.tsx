@@ -78,6 +78,7 @@ export default function Refuels() {
           <option value="">Всички източници</option>
           <option value="lukoil">Лукойл</option>
           <option value="manual">Ръчни</option>
+          <option value="putni_list">Пътни листове</option>
         </select>
         <input placeholder="Рег. номер" value={q} onChange={(e) => setQ(e.target.value)} style={{ width: 130 }} />
         <label className="check">
@@ -116,7 +117,7 @@ export default function Refuels() {
                   <td className="num">{fmt(r.amount)}</td>
                   <td>{r.station}</td>
                   <td>{r.company}</td>
-                  <td>{r.source === "manual" ? "ръчно" : "Лукойл"}</td>
+                  <td>{r.source === "manual" ? "ръчно" : r.source === "putni_list" ? "пътен лист" : "Лукойл"}</td>
                   <td>
                     {r.source === "manual" && (
                       <button className="btn small danger" onClick={() => del(r)}>Изтрий</button>

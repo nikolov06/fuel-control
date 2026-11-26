@@ -10,6 +10,7 @@ import Refuels from "./pages/Refuels";
 import Unmatched from "./pages/Unmatched";
 import MonthlyReport from "./pages/MonthlyReport";
 import Netfleet from "./pages/Netfleet";
+import TripLog from "./pages/TripLog";
 import "./App.css";
 
 const PAGES = [
@@ -18,6 +19,7 @@ const PAGES = [
   { id: "manual", label: "Ръчни зареждания", icon: "📋", el: <ManualPaste /> },
   { id: "refuels", label: "Зареждания", icon: "🧾", el: <Refuels /> },
   { id: "unmatched", label: "Неразпознати", icon: "❓", el: <Unmatched /> },
+  { id: "trips", label: "Пътни листове", icon: "🗒️", el: <TripLog /> },
   { id: "vehicles", label: "Машини", icon: "🚗", el: <Vehicles /> },
   { id: "netfleet", label: "Нетера (GPS)", icon: "📡", el: <Netfleet /> },
 ];

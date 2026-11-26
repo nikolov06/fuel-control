@@ -133,3 +133,5 @@ td.cell-err { background: #fde2df !important; color: var(--err); font-weight: 60
 .card .page-head { margin-top: 10px; }
 .card .page-head .btn { margin-left: 0; }
 .card .page-head .btn:first-of-type { margin-left: auto; }
+tr.weekend td { background: #f7f8fa; }
+table.grid tfoot td { position: sticky; bottom: 0; background: #f0f2f5; border-top: 1px solid var(--line); padding: 7px 8px; }

@@ -65,3 +65,12 @@ export function errText(e: unknown): string {
   const o = e as { message?: string; details?: string; hint?: string };
   return [o.message, o.details, o.hint].filter(Boolean).join(" | ") || JSON.stringify(e);
 }
+
+/** Чете всички листове с формулите (за импорт на пътни листове) */
+export async function readWorkbookSheets(file: File) {
+  const wb = XLSX.read(await file.arrayBuffer(), { cellFormula: true });
+  return wb.SheetNames.map((name) => ({
+    name,
+    cell: (a: string) => wb.Sheets[name][a] as { v?: unknown; f?: string } | undefined,
+  }));
+}
