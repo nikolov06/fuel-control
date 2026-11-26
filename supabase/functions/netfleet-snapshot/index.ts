@@ -131,7 +131,8 @@ Deno.serve(async (req) => {
         }));
 
       // Нови машини -> в номенклатурата (резервоар, норма и т.н. се попълват от интерфейса)
-      const plates = [...new Set(recs.map((x) => x.plate))].map((plate) => ({ plate }));
+      // Новите от Нетера НЕ влизат в разпределението автоматично (камиони, техника) — включват се от „Машини“
+      const plates = [...new Set(recs.map((x) => x.plate))].map((plate) => ({ plate, in_allocation: false }));
       if (plates.length) {
         const { error } = await admin.from("vehicles").upsert(plates, { onConflict: "plate", ignoreDuplicates: true });
         if (error) throw error;
