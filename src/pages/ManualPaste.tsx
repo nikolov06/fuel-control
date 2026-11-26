@@ -52,7 +52,6 @@ export default function ManualPaste() {
   return (
     <div>
       <div className="page-head">
-        <h2>Ръчни зареждания</h2>
         <a className="btn" href="/sablon_rachni_zarejdania.xlsx" download="Шаблон_ръчни_зареждания.xlsx">
           Свали шаблон
         </a>

@@ -4,8 +4,7 @@ import { supabase, configError } from "./lib/supabase";
 import { Notice } from "./lib/ui";
 import Login from "./pages/Login";
 import Vehicles from "./pages/Vehicles";
-import LukoilImport from "./pages/LukoilImport";
-import ManualPaste from "./pages/ManualPaste";
+import RefuelImport from "./pages/RefuelImport";
 import Refuels from "./pages/Refuels";
 import Unmatched from "./pages/Unmatched";
 import MonthlyReport from "./pages/MonthlyReport";
@@ -15,8 +14,7 @@ import "./App.css";
 
 const PAGES = [
   { id: "report", label: "Месечна справка", icon: "📊", el: <MonthlyReport /> },
-  { id: "lukoil", label: "Импорт Лукойл", icon: "⛽", el: <LukoilImport /> },
-  { id: "manual", label: "Ръчни зареждания", icon: "📋", el: <ManualPaste /> },
+  { id: "import", label: "Импорт на зареждания", icon: "⛽", el: <RefuelImport /> },
   { id: "refuels", label: "Зареждания", icon: "🧾", el: <Refuels /> },
   { id: "unmatched", label: "Неразпознати", icon: "❓", el: <Unmatched /> },
   { id: "trips", label: "Пътни листове", icon: "🗒️", el: <TripLog /> },
@@ -24,9 +22,17 @@ const PAGES = [
   { id: "netfleet", label: "Нетера (GPS)", icon: "📡", el: <Netfleet /> },
 ];
 
+// Стари адреси -> новия екран за импорт със съответния таб
+const LEGACY: Record<string, string> = { lukoil: "import", manual: "import/manual" };
+
 function currentPage(): string {
-  const h = window.location.hash.replace("#", "");
-  return PAGES.some((p) => p.id === h) ? h : "report";
+  let h = window.location.hash.replace("#", "");
+  if (LEGACY[h]) {
+    h = LEGACY[h];
+    history.replaceState(null, "", `#${h}`);
+  }
+  const id = h.split("/")[0];
+  return PAGES.some((p) => p.id === id) ? id : "report";
 }
 
 export default function App() {

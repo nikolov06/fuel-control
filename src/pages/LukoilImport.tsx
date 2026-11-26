@@ -73,9 +73,6 @@ export default function LukoilImport() {
 
   return (
     <div>
-      <div className="page-head">
-        <h2>Импорт от Лукойл</h2>
-      </div>
       <p className="muted">Качи „Справка за включени покупки във фактура“ (.xlsx). Преди запис ще видиш какво е разпознато.</p>
 
       <div className="toolbar">
